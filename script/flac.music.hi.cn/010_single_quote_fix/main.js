@@ -1,20 +1,20 @@
 // ==UserScript==
-// @name        Fix flac.music.hi.cn Links
-// @name:zh-CN  修复 flac.music.hi.cn 链接问题
-// @namespace   https://github.com/UsadaYu/Tampermonkey
-// @version     0.1.0
-// @description Fixes the issue where `download`/`copy` links on flac.music.hi.cn fail for songs with single quotes in their names.
+// @name              Fix flac.music.hi.cn Links (As of 2026-10-01, this website has fixed this bug and no longer requires this script)
+// @name:zh-CN        修复 flac.music.hi.cn 链接问题（截至 2026-10-01，该网站已修复此 Bug，不再需要此脚本）
+// @namespace         https://github.com/UsadaYu/Tampermonkey
+// @version           0.1.0
+// @description       Fixes the issue where `download`/`copy` links on flac.music.hi.cn fail for songs with single quotes in their names.
 // @description:zh-CN 修复 flac.music.hi.cn 网站上，因歌曲名包含单引号而导致的 `下载链接` 和 `复制名称` 功能失效的问题。
-// @author      UsadaYu
-// @match       *://flac.music.hi.cn/*
-// @icon        https://www.google.com/s2/favicons?sz=64&domain=music.hi.cn
-// @grant       none
-// @run-at      document-start
-// @license     MIT
-// @homepage    https://github.com/UsadaYu/Tampermonkey
-// @supportURL  https://github.com/UsadaYu/Tampermonkey/issues
-// @downloadURL https://raw.githubusercontent.com/UsadaYu/Tampermonkey/main/script/flac.music.hi.cn/single_quote_fix.js
-// @updateURL   https://raw.githubusercontent.com/UsadaYu/Tampermonkey/main/script/flac.music.hi.cn/single_quote_fix.js
+// @author            UsadaYu
+// @match             *://flac.music.hi.cn/*
+// @icon              https://www.google.com/s2/favicons?sz=64&domain=music.hi.cn
+// @grant             none
+// @run-at            document-start
+// @license           MIT
+// @homepage          https://github.com/UsadaYu/Tampermonkey
+// @supportURL        https://github.com/UsadaYu/Tampermonkey/issues
+// @downloadURL       https://raw.githubusercontent.com/UsadaYu/Tampermonkey/main/script/flac.music.hi.cn/010_single_quote_fix/main.js
+// @updateURL         https://raw.githubusercontent.com/UsadaYu/Tampermonkey/main/script/flac.music.hi.cn/010_single_quote_fix/main.js
 // ==/UserScript==
 
 (function () {
