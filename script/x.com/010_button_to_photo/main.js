@@ -2,7 +2,7 @@
 // @name              X(Twitter) quick jump to the `Photo` button
 // @name:zh-CN        X（推特）快捷跳转 `Photo（相册照片）` 按钮
 // @namespace         http://tampermonkey.net/
-// @version           0.1.1
+// @version           0.1.2
 // @description       Add a button at the top right corner of the tweet that leads to the user's `Photo` page
 // @description:zh-CN 在推文右上角添加跳转到该用户 `Photo（相册照片）` 页面的按钮
 // @author            UsadaYu
@@ -111,9 +111,10 @@
   }
 
   function createPhotoButton(username) {
+    const photoPath = `/${username}/media?filter=photo`;
     const btn = document.createElement('a');
     btn.className = BUTTON_CLASS;
-    btn.href = `https://x.com/${username}/media?filter=photo`;
+    btn.href = photoPath;
     if (openInNewTab) {
       btn.target = '_blank';
       btn.rel = 'noopener noreferrer';
@@ -160,7 +161,21 @@
     });
 
     btn.addEventListener('click', (e) => {
-      e.stopPropagation();
+      e.stopPropagation(); // 阻止冒泡，避免触发推文卡片的点击事件
+
+      if (!openInNewTab) {
+        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+          return;
+        }
+
+        e.preventDefault();
+
+        const currentState = window.history.state;
+        const newState = currentState ? { ...currentState } : null;
+
+        window.history.pushState(newState, '', photoPath);
+        window.dispatchEvent(new PopStateEvent('popstate', { state: newState }));
+      }
     });
 
     return btn;
