@@ -2,14 +2,16 @@
 // @name              X(Twitter) quick jump to the `Photo` button
 // @name:zh-CN        X（推特）快捷跳转 `Photo（相册照片）` 按钮
 // @namespace         http://tampermonkey.net/
-// @version           0.1.0
+// @version           0.1.1
 // @description       Add a button at the top right corner of the tweet that leads to the user's `Photo` page
 // @description:zh-CN 在推文右上角添加跳转到该用户 `Photo（相册照片）` 页面的按钮
 // @author            UsadaYu
 // @match             https://x.com/*
 // @match             https://twitter.com/*
 // @icon              https://www.google.com/s2/favicons?sz=64&domain=x.com
-// @grant             none
+// @grant             GM_getValue
+// @grant             GM_setValue
+// @grant             GM_registerMenuCommand
 // @run-at            document-idle
 // @license           MIT
 // @homepage          https://github.com/UsadaYu/Tampermonkey
@@ -21,9 +23,58 @@
 (function () {
   'use strict';
 
-  const BUTTON_CLASS = 'custom-photo-btn';
   const FINETUNE_POSX_BUTTON = -4; // 微调按钮位置
   const FINETUNE_POSY_ICON = -4; // 微调图标位置
+
+  const OPEN_IN_NEW_TAB_KEY = 'openInNewTab';
+  const BUTTON_CLASS = 'custom-photo-btn';
+
+  let openInNewTab = GM_getValue(OPEN_IN_NEW_TAB_KEY, true);
+  let menuCommandId = null;
+
+  function updatePhotoButtonsTarget() {
+    document.querySelectorAll(`.${BUTTON_CLASS}`).forEach((btn) => {
+      if (openInNewTab) {
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+      } else {
+        btn.removeAttribute('target');
+        btn.removeAttribute('rel');
+      }
+    });
+  }
+
+  function registerOrUpdateMenuCommand() {
+    const name = openInNewTab
+      ? '✓ Photo → New tab'
+      : '○ Photo → Current tab';
+
+    const title = openInNewTab
+      ? 'Enabled: Photo opens in a new tab'
+      : 'Disabled: Photo opens in the current tab';
+
+    const options = {
+      title,
+      autoClose: true
+    };
+
+    if (menuCommandId !== null) {
+      options.id = menuCommandId;
+    }
+
+    menuCommandId = GM_registerMenuCommand(
+      name,
+      toggleOpenInNewTab,
+      options
+    );
+  }
+
+  function toggleOpenInNewTab() {
+    openInNewTab = !openInNewTab;
+    GM_setValue(OPEN_IN_NEW_TAB_KEY, openInNewTab);
+    updatePhotoButtonsTarget();
+    registerOrUpdateMenuCommand();
+  }
 
   function getUsername(article) {
     const userNameContainer =
@@ -63,8 +114,10 @@
     const btn = document.createElement('a');
     btn.className = BUTTON_CLASS;
     btn.href = `https://x.com/${username}/media?filter=photo`;
-    btn.target = '_blank';
-    btn.rel = 'noopener noreferrer';
+    if (openInNewTab) {
+      btn.target = '_blank';
+      btn.rel = 'noopener noreferrer';
+    }
     btn.title = `View photos of @${username}`;
     btn.style.transform = `translateX(${FINETUNE_POSX_BUTTON}px)`;
     const icon = document.createElement('span');
@@ -142,8 +195,7 @@
       // 确保容器是横向 flex
       const style = getComputedStyle(targetContainer);
 
-      if (style.display === 'flex' ||
-        style.display === 'inline-flex') {
+      if (style.display === 'flex' || style.display === 'inline-flex') {
         targetContainer.insertBefore(btn, moreButton);
       } else {
         // 如果这一层不是 flex，再向上一层找
@@ -175,6 +227,7 @@
     subtree: true
   });
 
+  registerOrUpdateMenuCommand();
   addPhotoButtons();
 
 })();
