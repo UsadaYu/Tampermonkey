@@ -18,29 +18,27 @@
 // ==/UserScript==
 
 (function () {
-  'use strict';
+  "use strict";
 
   // console.log('Fix-flac-links: Script running');
 
   const fixLinks = () => {
     const linksToFix = document.querySelectorAll(
-      'a[href*="download_music"], a[href*="download_lyric"], a[href*="copy"]'
+      'a[href*="download_music"], a[href*="download_lyric"], a[href*="copy"]',
     );
 
-    linksToFix.forEach(link => {
+    linksToFix.forEach((link) => {
       // 使用 dataset 属性防止重复修复同一个链接
-      if (link.dataset.fixed === 'true') {
-        return;
-      }
+      if (link.dataset.fixed === "true") return;
 
-      const originalHref = link.getAttribute('href');
+      const originalHref = link.getAttribute("href");
       if (!originalHref) return;
 
       let regex, functionPart, content;
 
-      if (originalHref.startsWith('javascript:download_')) {
+      if (originalHref.startsWith("javascript:download_")) {
         regex = /^(javascript:download_(?:music|lyric)\(.*\s*,\s*')(.+)'\s*\)$/;
-      } else if (originalHref.startsWith('javascript:copy')) {
+      } else if (originalHref.startsWith("javascript:copy")) {
         regex = /^(javascript:copy\(')(.+?)'\s*\)$/;
       }
 
@@ -55,10 +53,10 @@
           const fixedContent = content.replace(/'/g, "\\'");
           const newHref = `${functionPart}${fixedContent}')`;
 
-          link.setAttribute('href', newHref);
-          link.dataset.fixed = 'true';
+          link.setAttribute("href", newHref);
+          link.dataset.fixed = "true";
 
-          console.log('Fixed link for:', content);
+          console.log("Fixed link for:", content);
         }
       }
     });
@@ -73,7 +71,7 @@
 
   const observerConfig = {
     childList: true,
-    subtree: true
+    subtree: true,
   };
 
   /**

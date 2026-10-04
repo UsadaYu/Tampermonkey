@@ -2,7 +2,7 @@
 // @name              X(Twitter) quick jump to the `Photo` button
 // @name:zh-CN        X（推特）快捷跳转 `Photo（相册照片）` 按钮
 // @namespace         http://tampermonkey.net/
-// @version           0.1.2
+// @version           0.1.3
 // @description       Add a button at the top right corner of the tweet that leads to the user's `Photo` page
 // @description:zh-CN 在推文右上角添加跳转到该用户 `Photo（相册照片）` 页面的按钮
 // @author            UsadaYu
@@ -21,52 +21,46 @@
 // ==/UserScript==
 
 (function () {
-  'use strict';
+  "use strict";
 
   const FINETUNE_POSX_BUTTON = -4; // 微调按钮位置
   const FINETUNE_POSY_ICON = -4; // 微调图标位置
 
-  const OPEN_IN_NEW_TAB_KEY = 'openInNewTab';
-  const BUTTON_CLASS = 'custom-photo-btn';
+  const OPEN_IN_NEW_TAB_KEY = "openInNewTab";
+  const BUTTON_CLASS = "custom-photo-btn";
 
-  let openInNewTab = GM_getValue(OPEN_IN_NEW_TAB_KEY, true);
+  let openInNewTab = GM_getValue(OPEN_IN_NEW_TAB_KEY, false);
   let menuCommandId = null;
 
   function updatePhotoButtonsTarget() {
     document.querySelectorAll(`.${BUTTON_CLASS}`).forEach((btn) => {
       if (openInNewTab) {
-        btn.target = '_blank';
-        btn.rel = 'noopener noreferrer';
+        btn.target = "_blank";
+        btn.rel = "noopener noreferrer";
       } else {
-        btn.removeAttribute('target');
-        btn.removeAttribute('rel');
+        btn.removeAttribute("target");
+        btn.removeAttribute("rel");
       }
     });
   }
 
   function registerOrUpdateMenuCommand() {
-    const name = openInNewTab
-      ? '✓ Photo → New tab'
-      : '○ Photo → Current tab';
+    const name = openInNewTab ? "✓ Photo → New tab" : "○ Photo → Current tab";
 
     const title = openInNewTab
-      ? 'Enabled: Photo opens in a new tab'
-      : 'Disabled: Photo opens in the current tab';
+      ? "Photo opens in a new tab"
+      : "Photo opens in the current tab";
 
     const options = {
       title,
-      autoClose: true
+      autoClose: true,
     };
 
     if (menuCommandId !== null) {
       options.id = menuCommandId;
     }
 
-    menuCommandId = GM_registerMenuCommand(
-      name,
-      toggleOpenInNewTab,
-      options
-    );
+    menuCommandId = GM_registerMenuCommand(name, toggleOpenInNewTab, options);
   }
 
   function toggleOpenInNewTab() {
@@ -77,13 +71,14 @@
   }
 
   function getUsername(article) {
-    const userNameContainer =
-      article.querySelector('[data-testid="User-Name"]');
+    const userNameContainer = article.querySelector(
+      '[data-testid="User-Name"]',
+    );
     if (!userNameContainer) return null;
 
     const links = userNameContainer.querySelectorAll('a[href^="/"]');
     for (const link of links) {
-      const href = link.getAttribute('href');
+      const href = link.getAttribute("href");
       if (href && /^\/[A-Za-z0-9_]+$/.test(href)) {
         return href.substring(1);
       }
@@ -97,9 +92,7 @@
     const caret = article.querySelector('[data-testid="caret"]');
     if (caret) {
       const button = caret.closest('button, [role="button"]');
-      if (button) {
-        return button;
-      }
+      if (button) return button;
     }
 
     // fallback，仅中英文
@@ -112,59 +105,65 @@
 
   function createPhotoButton(username) {
     const photoPath = `/${username}/media?filter=photo`;
-    const btn = document.createElement('a');
+    const btn = document.createElement("a");
     btn.className = BUTTON_CLASS;
     btn.href = photoPath;
     if (openInNewTab) {
-      btn.target = '_blank';
-      btn.rel = 'noopener noreferrer';
+      btn.target = "_blank";
+      btn.rel = "noopener noreferrer";
     }
     btn.title = `View photos of @${username}`;
     btn.style.transform = `translateX(${FINETUNE_POSX_BUTTON}px)`;
-    const icon = document.createElement('span');
-    icon.textContent = '📷';
+    const icon = document.createElement("span");
+    icon.textContent = "📷";
     icon.style.transform = `translateY(${FINETUNE_POSY_ICON}px)`;
     btn.appendChild(icon);
 
     Object.assign(btn.style, {
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
 
-      width: '32px',
-      height: '32px',
+      width: "38px",
+      height: "38px",
 
-      padding: '0',
-      margin: '0',
+      padding: "0",
+      margin: "0",
 
-      fontSize: '14px',
-      lineHeight: '1',
+      fontSize: "14px",
+      lineHeight: "1",
 
-      textDecoration: 'none',
-      cursor: 'pointer',
+      textDecoration: "none",
+      cursor: "pointer",
 
-      borderRadius: '9999px',
+      borderRadius: "9999px",
 
-      flexShrink: '0',
+      flexShrink: "0",
 
-      boxSizing: 'border-box',
+      boxSizing: "border-box",
 
-      transition: 'background-color 0.2s'
+      transition: "background-color 0.2s",
     });
 
-    btn.addEventListener('mouseenter', () => {
-      btn.style.backgroundColor = 'rgba(29, 155, 240, 0.1)';
+    btn.addEventListener("mouseenter", () => {
+      btn.style.backgroundColor = "rgba(29, 155, 240, 0.1)";
     });
 
-    btn.addEventListener('mouseleave', () => {
-      btn.style.backgroundColor = 'transparent';
+    btn.addEventListener("mouseleave", () => {
+      btn.style.backgroundColor = "transparent";
     });
 
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation(); // 阻止冒泡，避免触发推文卡片的点击事件
 
       if (!openInNewTab) {
-        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+        if (
+          e.button !== 0 ||
+          e.ctrlKey ||
+          e.metaKey ||
+          e.shiftKey ||
+          e.altKey
+        ) {
           return;
         }
 
@@ -173,8 +172,10 @@
         const currentState = window.history.state;
         const newState = currentState ? { ...currentState } : null;
 
-        window.history.pushState(newState, '', photoPath);
-        window.dispatchEvent(new PopStateEvent('popstate', { state: newState }));
+        window.history.pushState(newState, "", photoPath);
+        window.dispatchEvent(
+          new PopStateEvent("popstate", { state: newState }),
+        );
       }
     });
 
@@ -182,35 +183,26 @@
   }
 
   function addPhotoButtons() {
-    const articles =
-      document.querySelectorAll('article[data-testid="tweet"]');
+    const articles = document.querySelectorAll('article[data-testid="tweet"]');
     for (const article of articles) {
       // 防止重复
-      if (article.querySelector(`.${BUTTON_CLASS}`)) {
-        continue;
-      }
+      if (article.querySelector(`.${BUTTON_CLASS}`)) continue;
 
       const username = getUsername(article);
-      if (!username) {
-        continue;
-      }
+      if (!username) continue;
 
       const moreButton = getMoreButton(article);
-      if (!moreButton) {
-        continue;
-      }
+      if (!moreButton) continue;
 
       const targetContainer = moreButton.parentElement;
-      if (!targetContainer) {
-        continue;
-      }
+      if (!targetContainer) continue;
 
       const btn = createPhotoButton(username);
 
       // 确保容器是横向 flex
       const style = getComputedStyle(targetContainer);
 
-      if (style.display === 'flex' || style.display === 'inline-flex') {
+      if (style.display === "flex" || style.display === "inline-flex") {
         targetContainer.insertBefore(btn, moreButton);
       } else {
         // 如果这一层不是 flex，再向上一层找
@@ -218,8 +210,10 @@
         if (!parent) continue;
 
         const parentStyle = getComputedStyle(parent);
-        if (parentStyle.display === 'flex' ||
-          parentStyle.display === 'inline-flex') {
+        if (
+          parentStyle.display === "flex" ||
+          parentStyle.display === "inline-flex"
+        ) {
           parent.insertBefore(btn, targetContainer);
         }
       }
@@ -239,10 +233,9 @@
 
   observer.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
   });
 
   registerOrUpdateMenuCommand();
   addPhotoButtons();
-
 })();
